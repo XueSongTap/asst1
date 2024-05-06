@@ -6,7 +6,7 @@
 #include "logger.h"
 using namespace std;
 
-#define EXP_MAX 10
+#define EXP_MAX 10 // 定义指数的最大值
 
 Logger CS149Logger;
 
@@ -58,10 +58,10 @@ int main(int argc, char * argv[]) {
   int* exponents = new int[N+VECTOR_WIDTH];
   float* output = new float[N+VECTOR_WIDTH];
   float* gold = new float[N+VECTOR_WIDTH];
-  initValue(values, exponents, output, gold, N);
+  initValue(values, exponents, output, gold, N); // 初始化数组值
 
-  clampedExpSerial(values, exponents, gold, N);
-  clampedExpVector(values, exponents, output, N);
+  clampedExpSerial(values, exponents, gold, N); // 计算标准指数函数结果
+  clampedExpVector(values, exponents, output, N); // 计算向量化指数函数结果
 
   //absSerial(values, gold, N);
   //absVector(values, output, N);

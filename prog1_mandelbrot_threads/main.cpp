@@ -3,7 +3,8 @@
 #include <getopt.h>
 
 #include "CycleTimer.h"
-
+// mandelbrotSerial 和 mandelbrotThread: 分别为串行和多线程版本的Mandelbrot集计算函数。
+// writePPMImage: 将计算结果输出为PPM格式的图像文件。
 extern void mandelbrotSerial(
     float x0, float y0, float x1, float y1,
     int width, int height,
@@ -23,7 +24,7 @@ extern void writePPMImage(
     int width, int height,
     const char *filename,
     int maxIterations);
-
+//scaleAndShift: 对坐标进行缩放和平移，以改变Mandelbrot图形的视角。
 void
 scaleAndShift(float& x0, float& x1, float& y0, float& y1,
               float scale,
@@ -40,7 +41,6 @@ scaleAndShift(float& x0, float& x1, float& y0, float& y1,
     y1 += shiftY;
 
 }
-
 void usage(const char* progname) {
     printf("Usage: %s [options]\n", progname);
     printf("Program Options:\n");
@@ -65,7 +65,7 @@ bool verifyResult (int *gold, int *result, int width, int height) {
 
     return 1;
 }
-
+// 初始化参数: 设置图像的默认宽度、高度、迭代次数和线程数。
 int main(int argc, char** argv) {
 
     const unsigned int width = 1600;
@@ -154,7 +154,8 @@ int main(int argc, char** argv) {
 
     printf("[mandelbrot thread]:\t\t[%.3f] ms\n", minThread * 1000);
     writePPMImage(output_thread, width, height, "mandelbrot-thread.ppm", maxIterations);
-
+    //验证结果一致性:
+    //比较串行和多线程结果，不一致时输出错误信息。
     if (! verifyResult (output_serial, output_thread, width, height)) {
         printf ("Error : Output from threads does not match serial output\n");
 

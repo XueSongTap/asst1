@@ -34,6 +34,18 @@ void workerThreadStart(WorkerArgs * const args) {
     // to compute a part of the output image.  For example, in a
     // program that uses two threads, thread 0 could compute the top
     // half of the image and thread 1 could compute the bottom half.
+    int rowsPerThread = args->height / args->numThreads; // 每个线程处理的行数
+    int extraRows = args->height % args->numThreads;     // 不能均分的额外行数
+
+    // 计算每个线程的起始和结束行
+    int startRow = args->threadId * rowsPerThread + std::min(args->threadId, extraRows);
+    int endRow = startRow + rowsPerThread + (args->threadId < extraRows ? 1 : 0);
+
+    // 调用串行函数计算这一部分
+    mandelbrotSerial(args->x0, args->y0, args->x1, args->y1,
+                     args->width, args->height,
+                     startRow, endRow - startRow,
+                     args->maxIterations, args->output);
 
     printf("Hello world from thread %d\n", args->threadId);
 }

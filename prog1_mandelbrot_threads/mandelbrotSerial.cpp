@@ -37,9 +37,17 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
+/**
+ * 计算给定复数点的Mandelbrot迭代次数。
+ *
+ * @param c_re 复数的实部
+ * @param c_im 复数的虚部
+ * @param count 最大迭代次数
+ * @return 在逃逸到指定半径外之前的迭代次数
+ */
 static inline int mandel(float c_re, float c_im, int count)
 {
+    //z_re 和 z_im: 初始设置为点c 的坐标，表示复序列中的当前值𝑧
     float z_re = c_re, z_im = c_im;
     int i;
     for (i = 0; i < count; ++i) {
@@ -67,6 +75,19 @@ static inline int mandel(float c_re, float c_im, int count)
 //   into the image viewport.
 // * width, height describe the size of the output image
 // * startRow, totalRows describe how much of the image to compute
+/**
+ * 生成Mandelbrot集的图像。
+ *
+ * 根据给定的复平面坐标区域和图像尺寸，计算每个像素对应的Mandelbrot迭代次数。
+ *
+ * @param x0, y0, x1, y1 复平面上图像的左上角和右下角坐标
+ * @param width 图像的宽度
+ * @param height 图像的高度
+ * @param startRow 起始行号
+ * @param totalRows 计算的行数
+ * @param maxIterations 每个点的最大迭代次数
+ * @param output 输出数组，存储每个像素的迭代次数
+ */
 void mandelbrotSerial(
     float x0, float y0, float x1, float y1,
     int width, int height,

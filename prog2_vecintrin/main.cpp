@@ -241,15 +241,39 @@ void clampedExpSerial(float* values, int* exponents, float* output, int N) {
 }
 
 void clampedExpVector(float* values, int* exponents, float* output, int N) {
+    //
+    // CS149 STUDENTS TODO: Implement your vectorized version of
+    // clampedExpSerial() here.
+    //
+    // Your solution should work for any value of
+    // N and VECTOR_WIDTH, not just when VECTOR_WIDTH divides N
+    //
+    __cs149_vec_float x, result;
+    __cs149_vec_int exp;
+    __cs149_vec_float clampValue = _cs149_vset_float(9.999999f);
+    __cs149_vec_int one = _cs149_vset_int(1);
+    __cs149_vec_int zero = _cs149_vset_int(0);
+    __cs149_mask maskAll = _cs149_init_ones();
+    __cs149_vec_float upper_bound = _cs149_vset_float(9.999999f);
 
-  //
-  // CS149 STUDENTS TODO: Implement your vectorized version of
-  // clampedExpSerial() here.
-  //
-  // Your solution should work for any value of
-  // N and VECTOR_WIDTH, not just when VECTOR_WIDTH divides N
-  //
-  
+    for (int i = 0; i + VECTOR_WIDTH <= N; i += VECTOR_WIDTH) {
+        result = _cs149_vset_float(1.f);
+        _cs149_vload_float(x, values + i, maskAll);
+        _cs149_vload_int(exp, exponents + i, maskAll);
+
+        __cs149_mask needMul;
+        _cs149_vgt_int(needMul, exp, zero, maskAll);
+        while (_cs149_cntbits(needMul) > 0) {
+            _cs149_vmult_float(result, result, x, needMul);
+            _cs149_vsub_int(exp, exp, one, needMul);
+            _cs149_vgt_int(needMul, exp, zero, needMul);
+        }
+        __cs149_mask clampMask;
+
+        _cs149_vgt_float(clampMask, result, upper_bound, maskAll);
+        _cs149_vset_float(result, 9.999999f, clampMask);
+        _cs149_vstore_float(output + i, result, maskAll);
+    }
 }
 
 // returns the sum of all elements in values
@@ -270,11 +294,21 @@ float arraySumVector(float* values, int N) {
   //
   // CS149 STUDENTS TODO: Implement your vectorized version of arraySumSerial here
   //
-  
-  for (int i=0; i<N; i+=VECTOR_WIDTH) {
+    __cs149_mask init_one = _cs149_init_ones();
 
-  }
+    __cs149_vec_float sumVec = _cs149_vset_float(0.0f);  // 初始化向量寄存器以存储总和
+    __cs149_vec_float tempVec;  // 用于加载数组中的元素
 
-  return 0.0;
+    for (int i = 0; i < N; i += VECTOR_WIDTH) {
+        _cs149_vload_float(tempVec, values + i, init_one);  // 加载数组元素到向量寄存器
+        _cs149_vadd_float(sumVec, sumVec, tempVec, init_one);  // 计算每个向量寄存器中元素的总和
+    }
+
+    float sum = 0.0f;
+    for (int i = 0; i < VECTOR_WIDTH; ++i) {
+        sum += sumVec.value[i];  // 将每个向量寄存器中的结果相加以获得总和
+    }
+
+    return sum;
 }
 

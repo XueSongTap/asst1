@@ -1,0 +1,38 @@
+## Program 6: Making `K-Means` Faster (15 points) ##
+
+Program 6 clusters one million data points using the K-Means data clustering algorithm ([Wikipedia](https://en.wikipedia.org/wiki/K-means_clustering), [CS 221 Handout](https://stanford.edu/~cpiech/cs221/handouts/kmeans.html)). If you're unfamiliar with the algorithm, don't worry! The specifics aren't important to the exercise, but at a high level, given K starting points (cluster centroids), the algorithm iteratively updates the centroids until a convergence criteria is met. The results can be seen in the below images depicting the state of the algorithm at the beginning and end of the program, where red stars are cluster centroids and the data point colors correspond to cluster assignments.
+
+![K-Means starting and ending point](./handout-images/kmeans.jpg "Starting and ending point of the K-Means algorithm applied to 2 dimensional data.")
+
+In the starter code you have been given a correct implementation of the K-means algorithm, however in its current state it is not quite as fast as we would like it to be. This is where you come in! Your job will be to figure out **where** the implementation needs to be improved and **how** to improve it. The key skill you will practice in this problem is __isolating a performance hotspot__.  We aren't going to tell you where to look in the code.  You need to figure it out. Your first thought should be... where is the code spending the most time and you should insert timing code into the source to make measurements.  Based on these measurements, you should focus in on the part of the code that is taking a significant portion of the runtime, and then understand it more carefully to determine if there is a way to speed it up.
+
+**What you need to do:**
+
+1. Use the command `ln -s /afs/ir.stanford.edu/class/cs149/data/data.dat ./data.dat` to create a symbolic link to the dataset in your current directory (make sure you're in the `prog6_kmeans` directory). This is a large file (~800MB), so this is the preferred way to access it. However, if you'd like a local copy, you can run this command on your personal machine `scp [Your SUNetID]@myth[51-66].stanford.edu:/afs/ir.stanford.edu/class/cs149/data/data.dat ./data.dat`. Once you have the data, compile and run `kmeans` (it may take longer than usual for the program to load the data on your first try). The program will report the total runtime of the algorithm on the data.
+2.  Run `pip install -r requirements.txt` to download the necessary plotting packages. Next, try running `python3 plot.py` which will generate the files "start.png" and "end.png" from the logs ("start.log" and "end.log") generated from running `kmeans`. These files will be in the current directory and should look similar to the above images. __Warning: You might notice that not all points are assigned to the "closest" centroid. This is okay.__ (For those that want to understand why: We project 100-dimensional datapoints down to 2-D using [PCA](https://en.wikipedia.org/wiki/Principal_component_analysis) to produce these visualizations. Therefore, while the 100-D datapoint is near the appropriate centroid in high dimensional space, the projects of the datapoint and the centroid may not be close to each other in 2-D.). As long as the clustering looks "reasonable" (use the images produced by the starter code in step 2 as a reference) and most points appear to be assigned to the clostest centroid, the code remains correct.
+3.  Utilize the timing function in `common/CycleTimer.h` to determine where in the code there are performance bottlenecks. You will need to call `CycleTimer::currentSeconds()`, which returns the current time (in seconds) as a floating point number. Where is most of the time being spent in the code?
+4.  Based on your findings from the previous step, improve the implementation. We are looking for a speedup of about 2.1x or more (i.e $\frac{oldRuntime}{newRuntime} >= 2.1$). Please explain how you arrived at your solution, as well as what your final solution is and the associated speedup. The writeup of this process should describe a sequence of steps. We expect something of the form "I measured ... which let me to believe X. So to improve things I tried ... resulting in a speedup/slowdown of ...".
+  
+Constraints:
+- You may only modify code in `kmeansThread.cpp`. You are not allowed to modify the `stoppingConditionMet` function and you cannot change the interface to `kMeansThread`, but anything is fair game (e.g. you can add new members to the `WorkerArgs` struct, rewrite functions, allocate new arrays, etc.). However...
+- **Make sure you do not change the functionality of the implementation! If the algorithm doesn't converge or the result from running `python3 plot.py` does not look like what's produced by the starter code, something is wrong!** For example, you cannot simply remove the main "while" loop or change the semantics of the `dist` function, since this would yield incorrect results.
+- __Important:__ you may only parallelize __one__ of the following functions: `dist`, `computeAssignments`, `computeCentroids`, `computeCost`. For an example of how to write parallel code using `std::thread`, see `prog1_mandelbrot_threads/mandelbrotThread.cpp`.
+  
+Tips / Notes: 
+- This problem should not require a significant amount of coding. Our solution modified/added around 20-25 lines of code.
+- Once you've used timers to isolate hotspots, to improve the code make sure you understand the relative sizes of K, M, and N.
+- Try to prioritize code improvements with the potential for high returns and think about the different axes of parallelism available in the problem and how you may take advantage of them.
+- **The objective of this program is to give you more practice with learning how to profile and debug performance oriented programs. Even if you don't hit the performance target, if you demonstrate good/thoughtful debugging skills in the writeup you'll still get most of the points.**
+
+
+## 第6节课程：提速 K-Means 算法（共15分）
+
+第6节课程将使用 K-Means 数据聚类算法对一百万数据点进行聚类（相关链接：[维基百科](https://en.wikipedia.org/wiki/K-means_clustering)、[CS 221课程讲义](https://stanford.edu/~cpiech/cs221/handouts/kmeans.html)）。如果你对这个算法不熟悉，不用担心！细节对于这个练习来说并不重要，但从高层次上讲，给定K个起始点（簇质心），算法会迭代更新这些质心，直到满足收敛标准为止。下面的图片显示了程序开始和结束时算法的状态，其中红星是簇质心，数据点的颜色对应于簇分配。
+
+在你得到的起始代码中，已经正确实现了 K-means 算法，但目前的状态还不够快。这就是你要介入的地方！你的任务是确定需要改进的**位置**和**如何**改进。这个问题中你将练习的关键技能是__定位性能热点__。我们不会告诉你在代码中查找的位置。你需要自己找出来。你首先应该考虑的是...代码在哪里花费了最多的时间，你应该在源代码中插入计时代码来进行测量。根据这些测量，你应该关注在运行时间中占据相当部分的代码块，然后更仔细地理解这部分代码，看看是否有加速的方法。
+
+**你需要做的事情：**
+
+1. 使用命令 `ln -s /afs/ir.stanford.edu/class/cs149/data/data.dat ./data.dat` 在你当前目录中创建一个符号链接到数据集（确保你在 `prog6_kmeans` 目录中）。这是一个大文件（约800MB），所以这是访问它的首选方式。但如果你想在个人机器上拥有本地副本，可以运行此命令 `scp [Your SUNetID]@myth[51-66].stanford.edu:/afs/ir.stanford.edu/class/cs149/data/data.dat ./data.dat`。获得数据后，编译并运行 `kmeans`（程序加载数据可能比平常更慢）。程序将报告算法在数据上的总运行时间。
+2. 运行 `pip install -r requirements.txt` 下载必要的绘图包。接着，尝试运行 `python3 plot.py`，它将根据生成的日志（"start.log" 和 "end.log"）生成 "start.png" 和 "end.png" 文件。这些文件将位于当前目录，并应与上面的图片相似。__注意：你可能会注意到不是所有点都被分配到“最近”的质心，这是可以的__。（对于那些想了解原因的人：我们将100维数据点降至2维使用 [PCA](https://en.wikipedia.org/wiki/Principal_component_analysis) 来进行这些可视化。因此，虽然100维数据点在高维空间中接近适当的质心，但在2维中，数据点和质心的投影可能不会彼此接近。）。只要聚类看起来“合理”（使用起始代码在第二步产生的图片作为参考），并且大部分点似乎被分配给了最近的质心，代码就是正确的。
+3. 利用 `common/CycleTimer.h` 中的计时函数确定代码中存在性能瓶颈的位置。你需要调用 `CycleTimer::currentSeconds()`，该函数返回当前时间（以秒为单位）的浮点数。代码中的哪个部分花费了最多的时间
